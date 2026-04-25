@@ -35,8 +35,8 @@ GIT_DOWNLOAD_URLS = [
 # --- npm registry ---
 # Official first (has platform-specific sub-packages), CN mirrors as fallback.
 NPM_REGISTRIES = [
-    ("https://registry.npmjs.org", "official registry"),
     ("https://mirrors.cloud.tencent.com/npm/", "Tencent Cloud (CN)"),
+    ("https://registry.npmjs.org", "official registry"),
     ("https://repo.huaweicloud.com/repository/npm/", "Huawei Cloud (CN)"),
 ]
 
