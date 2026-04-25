@@ -1,3 +1,4 @@
+# Triggered on version tags (e.g. v1.2)
 name: Release
 
 on:
