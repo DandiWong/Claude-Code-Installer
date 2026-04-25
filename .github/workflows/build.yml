@@ -1,0 +1,33 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:   # allow manual trigger from GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build .exe with PyInstaller
+        working-directory: scripts
+        run: python -m PyInstaller build.spec --noconfirm
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClaudeCodeInstaller
+          path: scripts\dist\ClaudeCodeInstaller.exe
+          retention-days: 30

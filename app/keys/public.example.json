@@ -1,0 +1,5 @@
+{
+  "_comment": "Run 'python server/crypto.py' to generate this file. Do NOT commit public.json.",
+  "aes_key": "YOUR_AES_KEY_BASE64",
+  "ed_public_key": "YOUR_ED25519_PUBLIC_KEY_BASE64"
+}

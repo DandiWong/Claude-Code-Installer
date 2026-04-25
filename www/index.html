@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 懒人免翻墙一键安装包</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #2c2c32;
+  --panel:    #35343e;
+  --accent:   #da7756;
+  --accent-h: #e8896b;
+  --success:  #4ade80;
+  --text:     #ffffff;
+  --muted:    #8b8a8e;
+  --border:   rgba(255,255,255,0.08);
+  --radius:   10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans SC', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* ─── nav ─────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(44,44,50,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+nav .logo {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+nav .tagline {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+}
+nav a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color .2s; }
+nav a:hover { color: var(--text); }
+
+/* ─── hero ────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  align-items: center;
+  gap: 80px;
+  padding: 0 80px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 30%;
+  transform: translate(-50%, -50%);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(218,119,86,0.10) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.hero h1 {
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.hero p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 32px;
+  font-weight: 300;
+}
+
+.hero-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-right video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.btn-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: #fff;
+  padding: 14px 36px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 24px rgba(218,119,86,0.3);
+  cursor: pointer;
+  border: none;
+}
+.btn-dl:hover {
+  background: var(--accent-h);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(218,119,86,0.4);
+}
+.btn-dl svg { width: 18px; height: 18px; }
+
+.version-tag {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ─── features ────────────────────────────────── */
+.features {
+  padding: 120px 48px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.features h2 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 60px;
+  text-align: center;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  transition: border-color .2s, transform .2s;
+}
+.card:hover {
+  border-color: rgba(218,119,86,0.3);
+  transform: translateY(-3px);
+}
+.card-icon {
+  width: 36px; height: 36px;
+  background: rgba(218,119,86,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  color: var(--accent);
+  font-size: 18px;
+}
+.card h3 { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+.card p  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+/* ─── screenshots ────────────────────────────── */
+.screenshots {
+  padding: 0 48px 120px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.screenshots h2 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 40px;
+  text-align: center;
+}
+.shots {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+.shots img {
+  width: 100%;
+  max-width: 680px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: transform .25s, box-shadow .25s;
+  cursor: pointer;
+}
+.shots img:hover {
+  transform: scale(1.015);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ─── howto ───────────────────────────────────── */
+.howto {
+  padding: 0 48px 120px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.howto h2 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 48px;
+  text-align: center;
+}
+.step {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  align-items: flex-start;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+}
+.step-body h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.step-body p  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+/* ─── providers ───────────────────────────────── */
+.providers {
+  padding: 80px 48px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+.providers h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.providers .sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 48px;
+}
+.providers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.provider-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+}
+.provider-tag .dot {
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+/* ─── footer ─────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 48px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ─── scroll reveal ───────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .features, .screenshots, .howto, .providers { padding-left: 24px; padding-right: 24px; }
+  .grid { grid-template-columns: 1fr; }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 100px 24px 60px;
+    min-height: auto;
+  }
+  .hero-left { align-items: flex-start; }
+  .hero-right video { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <a href="/" class="logo" style="text-decoration:none;">Claude Code Installer</a>
+  </div>
+  <div style="display:flex;gap:32px">
+    <a href="#功能">功能</a>
+    <a href="#截图">截图</a>
+    <a href="#使用">使用</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero" id="下载">
+  <div class="hero-left">
+    <h1>Claude Code<br><em>懒人免翻墙一键安装</em></h1>
+    <p>不看教程，不输命令，无需繁琐配置，只要 3 分钟，就可以在任意位置使用 Claude Code。</p>
+    <a href="assets/release/ClaudeCodeInstaller.zip" class="btn-dl" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      立即下载
+    </a>
+    <div class="version-tag">v__APP_VERSION__ ·  Windows 10/11 专用</div>
+  </div>
+  <div class="hero-right">
+    <video src="assets/0-intro.mp4" controls autoplay muted loop playsinline></video>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="features" id="功能">
+  <h2>功能和优势</h2>
+  <div class="grid">
+    <div class="card reveal">
+      <div class="card-icon">⚡</div>
+      <h3>一键安装</h3>
+      <p>自动检测并安装缺失组件，全程不需要输入命令。安装完成即可使用。</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🔒</div>
+      <h3>国内直连免翻墙</h3>
+      <p>推荐可靠 API 服务商，Claude Code 直接通过国内节点通信，延迟低、无需翻墙。</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🖱️</div>
+      <h3>右键快捷启动</h3>
+      <p>不需要学习任何命令行知识，任意位置右键就可以运行。</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🔑</div>
+      <h3>多模型厂商支持</h3>
+      <p>支持 DragonCode、智谱 GLM、MiniMax 等多家模型厂商，Claude-Opus、Claude-Sonnet、GLM、MiniMax 想用哪个用哪个。</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🛡️</div>
+      <h3>安全可靠</h3>
+      <p>API Key 仅存储在您本地，本软件不读取、不上传，保证您的隐私安全。</p>
+    </div>
+    <div class="card reveal">
+      <div class="card-icon">🌐</div>
+      <h3>持续更新</h3>
+      <p>启动时实时更新最新厂商配置，无需更新软件即可使用新服务商。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Screenshots ── -->
+<section class="screenshots" id="截图">
+  <h2>截图预览</h2>
+  <div class="shots">
+    <img src="assets/1-启动.png"         alt="启动界面" class="reveal">
+    <img src="assets/2-选择供应商.png"   alt="选择供应商" class="reveal">
+    <img src="assets/3-右键菜单.png"     alt="右键菜单" class="reveal">
+  </div>
+</section>
+
+<!-- ── How to use ── -->
+<section class="howto" id="使用">
+  <h2>使用步骤</h2>
+  <div class="step reveal">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>下载安装包</h3>
+      <p>点击下载按钮获取 <code>.exe</code> 安装包，右键选择以管理员身份运行。</p>
+    </div>
+  </div>
+  <div class="step reveal">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>一键运行</h3>
+      <p>自动检测并安装缺失组件，全程无需输入任何命令。</p>
+    </div>
+  </div>
+  <div class="step reveal">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>选购服务</h3>
+      <p>选择一家 API 服务商，点下一步跳转官网，注册选购合适套餐后生成 API key ，复制备用。推荐使用 DragonCode，稳定不掺水。</p>
+    </div>
+  </div>
+  <div class="step reveal">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>配置模型</h3>
+      <p>填入服务商提供的 API Key，测试连接成功后点击完成，安装完毕。（API Key 仅保存在您的系统配置中，本软件不读取、不存储。）</p>
+    </div>
+  </div>
+  <div class="step reveal">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h3>右键启动</h3>
+      <p>在任意文件夹内右键，选择「从这里启动 Claude Code」，即可开始您的 AI 旅程。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Providers ── -->
+<section class="providers">
+  <h2>推荐的 API 服务商</h2>
+  <p class="sub">无需翻墙，国内直连</p>
+  <div class="providers-grid">
+    <div class="provider-tag"><span class="dot"></span> DragonCode</div>
+    <div class="provider-tag"><span class="dot"></span> 智谱 GLM 国内版</div>
+    <div class="provider-tag"><span class="dot"></span> MiniMax 国内版</div>
+    <div class="provider-tag">＋ 自定义服务商</div>
+  </div>
+</section>
+
+<footer>
+  Claude Code Installer @2026 Dandi 九爷 All right reserved.
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((el, i) => {
+    if (el.isIntersecting) {
+      el.target.style.transitionDelay = `${i * 80}ms`;
+      el.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

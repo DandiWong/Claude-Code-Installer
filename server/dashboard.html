@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Installer - Usage Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", sans-serif; background: #0f1117; color: #e0e0e0; min-height: 100vh; }
+
+.header { background: #1a1d27; padding: 20px 32px; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 20px; font-weight: 600; color: #fff; }
+.header .refresh-btn { background: #3b82f6; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.header .refresh-btn:hover { background: #2563eb; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 32px; }
+
+.filters { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.filters label { font-size: 14px; color: #9ca3af; }
+.filters input[type="date"] { background: #1e2130; border: 1px solid #374151; color: #e0e0e0; padding: 8px 12px; border-radius: 6px; font-size: 14px; }
+.filters .quick-btn { background: #1e2130; border: 1px solid #374151; color: #9ca3af; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.filters .quick-btn:hover, .filters .quick-btn.active { border-color: #3b82f6; color: #3b82f6; }
+.log-filters select option { background: #1e2130; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 20px 24px; }
+.stat-card .label { font-size: 13px; color: #9ca3af; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; color: #fff; }
+.stat-card .sub { font-size: 13px; color: #6b7280; margin-top: 4px; }
+.stat-card.accent .value { color: #3b82f6; }
+.stat-card.green .value { color: #22c55e; }
+.stat-card.yellow .value { color: #eab308; }
+
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 20px 24px; }
+.chart-card h3 { font-size: 15px; color: #9ca3af; margin-bottom: 16px; }
+.chart-card canvas { max-height: 280px; }
+
+.log-section { background: #1a1d27; border: 1px solid #2a2d3a; border-radius: 10px; padding: 20px 24px; }
+.log-section h3 { font-size: 15px; color: #9ca3af; margin-bottom: 12px; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table th { text-align: left; color: #6b7280; padding: 8px 12px; border-bottom: 1px solid #2a2d3a; font-weight: 500; }
+.log-table td { padding: 8px 12px; border-bottom: 1px solid #1e2130; }
+.log-table tr:hover td { background: #1e2130; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.badge.startup { background: #1e3a5f; color: #60a5fa; }
+.badge.success { background: #14532d; color: #4ade80; }
+
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
+  .container { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Claude Code Installer - Usage Dashboard</h1>
+  <button class="refresh-btn" onclick="loadData()">Refresh</button>
+</div>
+
+<div class="container">
+  <div class="filters">
+    <label>Date Range:</label>
+    <input type="date" id="dateFrom">
+    <span style="color:#6b7280">~</span>
+    <input type="date" id="dateTo">
+    <button class="quick-btn active" onclick="setRange('all', this)">All</button>
+    <button class="quick-btn" onclick="setRange('7d', this)">7 Days</button>
+    <button class="quick-btn" onclick="setRange('30d', this)">30 Days</button>
+    <button class="quick-btn" onclick="setRange('today', this)">Today</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card accent">
+      <div class="label">Total Startups</div>
+      <div class="value" id="statStartup">-</div>
+    </div>
+    <div class="stat-card green">
+      <div class="label">Total Success</div>
+      <div class="value" id="statSuccess">-</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="label">Success Rate</div>
+      <div class="value" id="statRate">-</div>
+      <div class="sub">success / startup</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Provider Distribution</h3>
+      <canvas id="chartProvider"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Daily Trend</h3>
+      <canvas id="chartTrend"></canvas>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <h3>Recent Events (latest 200)</h3>
+    <div class="log-filters" style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+      <label style="font-size:13px;color:#9ca3af;">Event:</label>
+      <select id="filterEvent" autocomplete="off" onchange="renderLog()" style="background:#1e2130;border:1px solid #374151;color:#e0e0e0;padding:6px 10px;border-radius:6px;font-size:13px;">
+        <option value="">All</option>
+        <option value="startup">startup</option>
+        <option value="success">success</option>
+      </select>
+      <label style="font-size:13px;color:#9ca3af;">Provider:</label>
+      <select id="filterProvider" autocomplete="off" onchange="renderLog()" style="background:#1e2130;border:1px solid #374151;color:#e0e0e0;padding:6px 10px;border-radius:6px;font-size:13px;">
+        <option value="">All</option>
+      </select>
+      <button onclick="clearLogFilters()" style="background:#1e2130;border:1px solid #374151;color:#9ca3af;padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Clear</button>
+    </div>
+    <table class="log-table">
+      <thead><tr><th>Time</th><th>Event</th><th>Provider</th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let providerChart = null;
+let trendChart = null;
+let allEntries = [];
+
+function setRange(range, btn) {
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const now = new Date();
+  const from = document.getElementById('dateFrom');
+  const to = document.getElementById('dateTo');
+  to.value = now.toISOString().slice(0, 10);
+
+  if (range === 'all') { from.value = ''; to.value = ''; }
+  else if (range === 'today') { from.value = now.toISOString().slice(0, 10); }
+  else {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (range === '7d' ? 7 : 30));
+    from.value = d.toISOString().slice(0, 10);
+  }
+  loadData();
+}
+
+async function loadData() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const apiBase = window.API_BASE || '/api/';
+  let url = apiBase + 'stats?';
+  if (from) url += 'from=' + from + '&';
+  if (to) url += 'to=' + to;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Stats
+    document.getElementById('statStartup').textContent = data.startup_count.toLocaleString();
+    document.getElementById('statSuccess').textContent = data.success_count.toLocaleString();
+    const rate = data.startup_count > 0
+      ? (data.success_count / data.startup_count * 100).toFixed(1) + '%'
+      : '-';
+    document.getElementById('statRate').textContent = rate;
+
+    // Provider chart
+    const providers = data.providers || {};
+    const pLabels = Object.keys(providers);
+    const pValues = Object.values(providers);
+    const colors = ['#3b82f6', '#22c55e', '#eab308', '#ef4444', '#a855f7', '#ec4899'];
+
+    if (providerChart) providerChart.destroy();
+    providerChart = new Chart(document.getElementById('chartProvider'), {
+      type: 'bar',
+      data: {
+        labels: pLabels,
+        datasets: [{ label: 'Success Count', data: pValues, backgroundColor: colors.slice(0, pLabels.length) }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { color: '#1e2130' } },
+          y: { ticks: { color: '#9ca3af', stepSize: 1 }, grid: { color: '#1e2130' }, beginAtZero: true }
+        }
+      }
+    });
+
+    // Trend chart
+    const dailyMap = {};
+    const entries = data.entries || [];
+    allEntries = entries;
+    buildProviderSelect(entries);
+    entries.forEach(e => {
+      const day = (e.timestamp || '').slice(0, 10);
+      if (!day) return;
+      if (!dailyMap[day]) dailyMap[day] = { startup: 0, success: 0 };
+      dailyMap[day][e.event] = (dailyMap[day][e.event] || 0) + 1;
+    });
+    const days = Object.keys(dailyMap).sort();
+    const startups = days.map(d => dailyMap[d].startup);
+    const successes = days.map(d => dailyMap[d].success);
+
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(document.getElementById('chartTrend'), {
+      type: 'line',
+      data: {
+        labels: days,
+        datasets: [
+          { label: 'Startup', data: startups, borderColor: '#3b82f6', backgroundColor: '#3b82f620', tension: 0.3, fill: true },
+          { label: 'Success', data: successes, borderColor: '#22c55e', backgroundColor: '#22c55e20', tension: 0.3, fill: true },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#9ca3af' } } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { color: '#1e2130' } },
+          y: { ticks: { color: '#9ca3af', stepSize: 1 }, grid: { color: '#1e2130' }, beginAtZero: true }
+        }
+      }
+    });
+
+    // Log table
+    renderLog();
+  } catch (err) {
+    console.error('Failed to load stats:', err);
+  }
+}
+
+function renderLog() {
+  const eventFilter = document.getElementById('filterEvent').value;
+  const providerFilter = document.getElementById('filterProvider').value;
+  const tbody = document.getElementById('logBody');
+  tbody.innerHTML = '';
+
+  const filtered = allEntries.filter(e => {
+    if (eventFilter && e.event !== eventFilter) return false;
+    if (providerFilter && e.provider !== providerFilter) return false;
+    return true;
+  });
+
+  const reversed = [...filtered].reverse();
+  reversed.forEach(e => {
+    const tr = document.createElement('tr');
+    const ts = e.timestamp ? new Date(e.timestamp).toLocaleString() : '-';
+    const ev = e.event || '-';
+    const pv = e.provider || '-';
+    tr.innerHTML = `<td>${ts}</td><td><span class="badge ${ev}">${ev}</span></td><td>${pv}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildProviderSelect(entries) {
+  const providers = [...new Set(entries.map(e => e.provider).filter(Boolean))].sort();
+  const sel = document.getElementById('filterProvider');
+  const current = sel.value;
+  // keep the first "All" option, append providers after it
+  while (sel.options.length > 1) sel.remove(1);
+  providers.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    sel.appendChild(opt);
+  });
+  // Restore previous selection if still valid; otherwise reset to All
+  sel.value = providers.includes(current) ? current : '';
+}
+
+function clearLogFilters() {
+  document.getElementById('filterEvent').value = '';
+  document.getElementById('filterProvider').value = '';
+  renderLog();
+}
+
+// Explicitly reset filters on every page load to override browser form-state restoration.
+// Some browsers (Firefox etc.) ignore autocomplete="off" on <select> and silently restore
+// the previously selected value, causing the filter to be non-empty even when the dropdown
+// visually appears to show "All".
+document.getElementById('filterEvent').value = '';
+document.getElementById('filterProvider').value = '';
+loadData();
+</script>
+</body>
+</html>

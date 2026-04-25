@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build exe
+        working-directory: scripts
+        run: python -m PyInstaller build.spec --noconfirm
+
+      - name: Package zip
+        working-directory: scripts
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          python _build_helpers.py package $version
+        shell: pwsh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ github.ref_name }}"
+          body: |
+            ## 下载
+
+            下载 `ClaudeCodeInstaller.zip`，解压后运行 `ClaudeCodeInstaller.exe`。
+
+            需要管理员权限，Windows 10/11 适用。
+          files: www/assets/release/ClaudeCodeInstaller.zip
+          draft: false
+          prerelease: false

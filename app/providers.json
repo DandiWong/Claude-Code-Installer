@@ -1,0 +1,36 @@
+{
+  "providers": [
+    {
+      "name": "DragonCode（推荐）",
+      "base_url": "https://dragoncode.codes",
+      "test_path": "",
+      "default_model": "claude-sonnet-4-6",
+      "website": "https://dragoncode.codes/register?ref=4Y363VZ6",
+      "advantage": "提供最强模型 Opus-4.7，Claude 原生体验，稳定可靠"
+    },
+    {
+      "name": "智谱 GLM 国内版",
+      "base_url": "https://open.bigmodel.cn/api/anthropic",
+      "test_path": "/v1/messages",
+      "default_model": "glm-5.1",
+      "website": "https://open.bigmodel.cn/glm-coding",
+      "advantage": "清华系模型，编码能力强，Sonnet 平替"
+    },
+    {
+      "name": "MiniMax 国内版",
+      "base_url": "https://api.minimaxi.com/anthropic",
+      "test_path": "/v1/messages",
+      "default_model": "MiniMax-M2.7",
+      "website": "https://platform.minimaxi.com/subscribe/token-plan",
+      "advantage": "年度订阅只需 290 元，日常任务性价比之选"
+    },
+    {
+      "name": "自定义",
+      "base_url": "",
+      "test_path": "",
+      "default_model": "",
+      "website": "",
+      "advantage": ""
+    }
+  ]
+}

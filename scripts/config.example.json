@@ -1,0 +1,175 @@
+{
+  "info": {
+    "latest": {
+      "version": "1.0",
+      "download_url": "https://your-domain.com/assets/release/ClaudeCodeInstaller.zip",
+      "sha256": "",
+      "release_notes": "",
+      "exe_sha256": ""
+    },
+    "min_version": "1.0",
+    "notice": "",
+    "notice_level": "info",
+    "features": {
+      "report_enabled": true
+    }
+  },
+  "ssh": {
+    "user": "root",
+    "host": "YOUR_SERVER_IP",
+    "port": 22,
+    "key": "~/.ssh/id_rsa"
+  },
+  "servers": {
+    "prod": {
+      "port": 9090
+    },
+    "test": {
+      "port": 9091
+    }
+  },
+  "claude_settings": {
+    "env": {
+      "API_TIMEOUT_MS": "3000000",
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+      "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+      "ENABLE_TOOL_SEARCH": "auto:5"
+    },
+    "cleanupPeriodDays": 14,
+    "permissions": {
+      "allow": [
+        "Bash(*)",
+        "Read(*)",
+        "Write(*)",
+        "Edit(*)",
+        "Task(*)",
+        "Glob(*)",
+        "Grep(*)",
+        "Search(*)",
+        "Skill(*)",
+        "ToolSearch(*)",
+        "NotebookEdit(*)",
+        "WebSearch",
+        "WebSearch(*)",
+        "SendMessage(*)",
+        "TeamCreate(*)",
+        "TeamDelete(*)",
+        "TaskCreate(*)",
+        "TaskUpdate(*)",
+        "TaskGet(*)",
+        "TaskList(*)",
+        "TaskOutput(*)",
+        "TaskStop(*)",
+        "EnterPlanMode(*)",
+        "ExitPlanMode(*)",
+        "AskUserQuestion(*)",
+        "ListMcpResourcesTool(*)",
+        "ReadMcpResourceTool(*)",
+        "mcp__context7__*",
+        "mcp__exa__*",
+        "mcp__memory__*",
+        "mcp__github__*",
+        "mcp__fetch__*",
+        "mcp__jina-reader__*"
+      ],
+      "deny": [
+        "WebFetch",
+        "WebFetch(*)",
+        "Bash(rm -rf /)*",
+        "Bash(rm -rf ~)*",
+        "Bash(rm -rf .)*",
+        "Bash(rm -rf *)*",
+        "Bash(sudo:*)",
+        "Bash(chmod 777:*)",
+        "Bash(>/dev/*)",
+        "Bash(curl*|*sh)*",
+        "Bash(wget*|*sh)*",
+        "Bash(*>~/.ssh/*)",
+        "Bash(*>~/.zshrc)*",
+        "Bash(*>~/.bashrc)*",
+        "Bash(*>~/.profile)*",
+        "Bash(*>~/.zprofile)*",
+        "Bash(git push --force*main)*",
+        "Bash(git push -f*main)*",
+        "Bash(git push --force*master)*",
+        "Bash(git push -f*master)*",
+        "Bash(git push --force-with-lease*main)*",
+        "Bash(git push --force-with-lease*master)*",
+        "Bash(git push origin +main)*",
+        "Bash(git push origin +master)*",
+        "Bash(git reset --hard origin/*)*",
+        "Bash(git clean -f*)*",
+        "Bash(git checkout -- .)*",
+        "Bash(git restore .)*",
+        "Bash(npm publish)*",
+        "Bash(pnpm publish)*",
+        "Bash(yarn publish)*",
+        "Bash(docker system prune)*",
+        "Bash(mkfs*)*",
+        "Bash(dd if=*)*",
+        "Bash(eval *)*",
+        "Bash(bash -c *)*",
+        "Bash(sh -c *)*",
+        "Bash(osascript*)*",
+        "Bash(crontab*)*",
+        "Bash(launchctl*)*",
+        "Bash(python3 -c *import os*)*",
+        "Bash(node -e *)*",
+        "Bash(perl -e *)*",
+        "Bash(xargs *)*",
+        "Bash(open http*)*",
+        "Bash(source /dev/*)*"
+      ]
+    }
+  },
+  "providers": {
+    "prod": [
+      {
+        "name": "Your Provider",
+        "base_url": "https://your-provider.com",
+        "test_path": "",
+        "default_model": "claude-sonnet-4-6",
+        "opus_model": "claude-opus-4-6",
+        "sonnet_model": "claude-sonnet-4-6",
+        "haiku_model": "claude-haiku-4-5-20251001",
+        "website": "https://your-provider.com",
+        "advantage": ""
+      },
+      {
+        "name": "自定义",
+        "base_url": "",
+        "test_path": "",
+        "default_model": "",
+        "opus_model": "",
+        "sonnet_model": "",
+        "haiku_model": "",
+        "website": "",
+        "advantage": ""
+      }
+    ],
+    "test": [
+      {
+        "name": "Your Test Provider",
+        "base_url": "https://your-test-provider.com",
+        "test_path": "",
+        "default_model": "claude-sonnet-4-6",
+        "opus_model": "claude-opus-4-6",
+        "sonnet_model": "claude-sonnet-4-6",
+        "haiku_model": "claude-haiku-4-5-20251001",
+        "website": "https://your-test-provider.com",
+        "advantage": ""
+      },
+      {
+        "name": "自定义",
+        "base_url": "",
+        "test_path": "",
+        "default_model": "",
+        "opus_model": "",
+        "sonnet_model": "",
+        "haiku_model": "",
+        "website": "",
+        "advantage": ""
+      }
+    ]
+  }
+}
