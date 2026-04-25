@@ -176,11 +176,51 @@ class InstallerWindow(ctk.CTk):
                 base = sys._MEIPASS  # type: ignore[attr-defined]
             else:
                 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            icon = os.path.join(base, "assets", "icon.ico")
-            if os.path.isfile(icon):
-                self.iconbitmap(icon)
+            icon_path = os.path.join(base, "assets", "icon.ico")
+            if not os.path.isfile(icon_path):
+                return
+            # Prevent the default blue-box icon immediately via Tkinter
+            self.iconbitmap(icon_path)
+            # After the event loop starts and HWND is fully valid, apply the
+            # Win32 WM_SETICON so Windows picks the right DPI-scaled frame
+            # from the multi-size ICO for the taskbar.
+            self.after(100, lambda: self._set_window_icon_win32(icon_path))
         except Exception:
             pass
+
+    def _set_window_icon_win32(self, icon_path: str) -> None:
+        """Set window icon via Win32 API directly, bypassing Tkinter's Tcl layer.
+
+        Uses LoadImageW to select the correct size from the multi-size ICO,
+        then WM_SETICON to apply both ICON_SMALL and ICON_BIG so Windows can
+        pick the right resolution for the taskbar at any DPI scale.
+        """
+        import ctypes
+        from ctypes import windll, wintypes
+
+        IMAGE_ICON = 1
+        LR_LOADFROMFILE = 0x10
+        WM_SETICON = 0x0080
+        ICON_SMALL = 0
+        ICON_BIG = 1
+
+        hwnd = windll.user32.GetParent(self.winfo_id())
+
+        # SM_CXSMICON/SM_CYSMICON = metrics 49/50 (title-bar / taskbar small icon)
+        sm = windll.user32.GetSystemMetrics(49)
+        hicon_small = windll.user32.LoadImageW(
+            None, icon_path, IMAGE_ICON, sm, sm, LR_LOADFROMFILE,
+        )
+        # SM_CXICON/SM_CYICON = metrics 11/12 (large icon used by taskbar & Alt-Tab)
+        lg = windll.user32.GetSystemMetrics(11)
+        hicon_large = windll.user32.LoadImageW(
+            None, icon_path, IMAGE_ICON, lg, lg, LR_LOADFROMFILE,
+        )
+
+        if hicon_small:
+            windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon_small)
+        if hicon_large:
+            windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon_large)
 
     def _set_title_bar_color(self) -> None:
         if sys.platform != "win32":

@@ -96,6 +96,23 @@ def elevate() -> None:
     sys.exit(0)
 
 
+def _set_dpi_awareness() -> None:
+    """Enable Per-Monitor DPI awareness so Windows uses native icon resolution."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (-4), Windows 10 1703+
+        ctypes.windll.user32.SetProcessDpiAwarenessContext(-4)
+    except Exception:
+        try:
+            import ctypes
+            # Fallback: PROCESS_PER_MONITOR_DPI_AWARE (2), Windows 8.1+
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)
+        except Exception:
+            pass
+
+
 def main() -> None:
     logger = setup_error_log()
 
@@ -109,6 +126,8 @@ def main() -> None:
     if sys.platform == "win32" and not is_admin():
         elevate()
         return
+
+    _set_dpi_awareness()
 
     try:
         from app.window import InstallerWindow

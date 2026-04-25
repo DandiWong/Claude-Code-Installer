@@ -3,7 +3,7 @@ All magic values in one place: registry keys, download URLs, command strings.
 """
 
 APP_NAME = "Claude Code 懒人免翻墙一键安装包"
-APP_VERSION = "1.1"  # 由 build.bat 自动维护，勿手动修改
+APP_VERSION = "1.2"  # 由 build.bat 自动维护，勿手动修改
 
 # --- Download URLs ---
 # Node.js fallback version (used only if latest-version lookup fails)
