@@ -14,6 +14,7 @@ import json
 import pathlib
 from datetime import datetime, timezone
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qs
 
 from crypto import encrypt_and_sign
@@ -193,10 +194,16 @@ class ProvidersHandler(BaseHTTPRequestHandler):
             self.send_error(400, "Invalid event type")
             return
 
+        ip = (
+            self.headers.get("X-Real-IP")
+            or self.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+            or self.client_address[0]
+        )
         entry = {
             "event": event,
             "timestamp": data.get("timestamp") or datetime.now(timezone.utc).isoformat(),
             "provider": data.get("provider", ""),
+            "ip": ip,
         }
         with open(USAGE_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -208,9 +215,13 @@ class ProvidersHandler(BaseHTTPRequestHandler):
         print(f"[{self.log_date_time_string()}] {fmt % args}")
 
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
+
 def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    server = HTTPServer((HOST, PORT), ProvidersHandler)
+    server = ThreadedHTTPServer((HOST, PORT), ProvidersHandler)
     print(f"Config API running on http://{HOST}:{PORT}")
     try:
         server.serve_forever()

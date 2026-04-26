@@ -116,7 +116,7 @@ body { font-family: -apple-system, "Segoe UI", sans-serif; background: #0f1117; 
       <button onclick="clearLogFilters()" style="background:#1e2130;border:1px solid #374151;color:#9ca3af;padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Clear</button>
     </div>
     <table class="log-table">
-      <thead><tr><th>Time</th><th>Event</th><th>Provider</th></tr></thead>
+      <thead><tr><th>Time</th><th>Event</th><th>Provider</th><th>IP</th></tr></thead>
       <tbody id="logBody"></tbody>
     </table>
   </div>
@@ -249,7 +249,8 @@ function renderLog() {
     const ts = e.timestamp ? new Date(e.timestamp).toLocaleString() : '-';
     const ev = e.event || '-';
     const pv = e.provider || '-';
-    tr.innerHTML = `<td>${ts}</td><td><span class="badge ${ev}">${ev}</span></td><td>${pv}</td>`;
+    const ip = e.ip || '-';
+    tr.innerHTML = `<td>${ts}</td><td><span class="badge ${ev}">${ev}</span></td><td>${pv}</td><td style="color:#6b7280;font-family:monospace">${ip}</td>`;
     tbody.appendChild(tr);
   });
 }
